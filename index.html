@@ -1,0 +1,385 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Какой образ раскрывает вашу истинную природу?</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet">
+
+<!-- ============================================================
+     НАСТРОЙКИ  —  здесь можно менять всё, не трогая остальное
+     Ищите блок <script id="config"> ниже, в самом низу файла.
+     ============================================================ -->
+
+<style>
+:root{
+  --ivory:#F2EDE7;
+  --ink:#4A3B31;
+  --wine:#9E5A34;      /* терракота — как заголовок КОРОЛЕВА */
+  --wine-soft:#B98A66;
+  --gold:#C39A5B;
+  --line:#D9CDBF;
+  --shadow:rgba(74,59,49,.14);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{background:var(--ivory);color:var(--ink);font-family:"Manrope",system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+body{min-height:100vh;line-height:1.5}
+.wrap{max-width:680px;margin:0 auto;padding:24px 18px 120px}
+.serif{font-family:"Cormorant Garamond",Georgia,serif}
+
+/* --- экраны --- */
+.screen{display:none;animation:fade .5s ease both}
+.screen.on{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){.screen{animation:none}}
+
+/* --- интро --- */
+.intro{text-align:center;padding-top:24px}
+.intro .logo{width:78px;height:auto;margin:0 auto 20px;display:block}
+.intro .eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--wine);margin-bottom:22px}
+.intro h1{font-size:clamp(30px,8vw,46px);font-weight:500;line-height:1.08;letter-spacing:.005em;margin-bottom:24px}
+.intro h1 em{font-style:italic;color:var(--wine)}
+.intro p{max-width:520px;margin:0 auto 16px;font-size:16px;color:#4a3c46}
+.intro .howto{margin-top:22px;padding:14px 18px;border:1px solid var(--line);border-radius:12px;font-size:15px;color:var(--wine)}
+.divider{width:40px;height:1px;background:var(--gold);margin:28px auto}
+
+/* --- шапка вопроса --- */
+.qhead{margin-bottom:20px}
+.counter{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--wine-soft);margin-bottom:12px}
+.bar{height:2px;background:var(--line);border-radius:2px;overflow:hidden;margin-bottom:22px}
+.bar > i{display:block;height:100%;background:var(--wine);width:0;transition:width .4s ease}
+.qtext{font-size:clamp(21px,5.5vw,28px);font-weight:500;line-height:1.2}
+.hint{font-size:13px;color:#8a7d84;margin-top:8px}
+
+/* --- сетка картинок --- */
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:22px}
+@media (min-width:520px){.grid{grid-template-columns:repeat(4,1fr);gap:12px}}
+.tile{position:relative;aspect-ratio:1;border:1px solid var(--line);border-radius:10px;overflow:hidden;cursor:pointer;background:#E7DFD7;transition:transform .18s ease,border-color .18s ease,box-shadow .18s ease;-webkit-tap-highlight-color:transparent}
+.tile:hover{transform:translateY(-2px);box-shadow:0 6px 16px var(--shadow)}
+.tile img{width:100%;height:100%;object-fit:cover;display:block}
+/* подпись-заглушка, пока нет реальных картинок */
+.tile .ph{position:absolute;inset:0;display:flex;flex-direction:column;justify-content:space-between;padding:8px;background:linear-gradient(150deg,#EDE5DD,#E0D6CC)}
+.tile .ph .num{font-family:"Cormorant Garamond",serif;font-size:26px;color:var(--wine-soft);line-height:1}
+.tile .ph .nm{font-size:10px;letter-spacing:.04em;text-transform:uppercase;color:#6b5c63;font-weight:600}
+.tile.sel{border-color:var(--gold);box-shadow:0 0 0 2px var(--gold) inset,0 6px 18px var(--shadow)}
+.tile .check{position:absolute;top:6px;right:6px;width:24px;height:24px;border-radius:50%;background:var(--gold);color:#fff;display:none;align-items:center;justify-content:center;font-size:14px;font-family:"Cormorant Garamond",serif}
+.tile.sel .check{display:flex}
+.tile:focus-visible{outline:3px solid var(--wine);outline-offset:2px}
+.tile.contain img{object-fit:contain;background:#E7DFD7}
+.tile .cap{position:absolute;left:0;right:0;bottom:0;padding:14px 6px 5px;font-size:10px;line-height:1.15;color:#fff;text-align:center;background:linear-gradient(to top,rgba(42,30,40,.74),transparent);pointer-events:none}
+
+/* --- кнопка --- */
+.foot{position:fixed;left:0;right:0;bottom:0;background:linear-gradient(to top,var(--ivory) 68%,transparent);padding:16px 18px 22px}
+.foot .inner{max-width:680px;margin:0 auto;display:flex;gap:10px}
+#back{flex:0 0 38%;width:auto}
+#next{flex:1;width:auto}
+.btn{width:100%;border:none;border-radius:40px;background:var(--wine);color:#fff;font-family:"Manrope",sans-serif;font-size:16px;font-weight:600;padding:16px;cursor:pointer;transition:background .2s ease,opacity .2s ease}
+.btn:hover{background:#672f45}
+.btn:disabled{background:#C8BDB4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--wine);border:1px solid var(--wine)}
+.btn.ghost:hover{background:rgba(122,59,82,.06)}
+
+/* --- результат --- */
+.result{text-align:center;padding-top:30px}
+.result .logo{width:64px;height:auto;margin:0 auto 18px;display:block}
+.result .eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--wine-soft);margin-bottom:16px}
+.result .name{font-size:clamp(38px,12vw,66px);font-weight:500;color:var(--wine);line-height:1;margin-bottom:6px}
+.result .blend{font-size:15px;color:#6b5c63;margin-top:14px;max-width:440px;margin-left:auto;margin-right:auto}
+.result .divider{margin:30px auto}
+.tally{max-width:360px;margin:26px auto 0;text-align:left}
+.tally .row{display:flex;align-items:center;gap:10px;margin-bottom:9px;font-size:13px;color:#5a4c54}
+.tally .row .lb{width:132px;flex-shrink:0}
+.tally .row .tr{flex:1;height:6px;background:var(--line);border-radius:6px;overflow:hidden}
+.tally .row .tr i{display:block;height:100%;background:var(--wine-soft)}
+.tally .row.top .lb{color:var(--wine);font-weight:600}
+.tally .row.top .tr i{background:var(--gold)}
+.tally .row .vl{width:22px;text-align:right;font-variant-numeric:tabular-nums}
+.result .cta{margin-top:34px}
+.mini{font-size:12px;color:#9a8d94;margin-top:14px}
+.brandmark{margin-top:34px;font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--wine-soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ИНТРО -->
+  <section class="screen on" id="screen-intro">
+    <div class="intro">
+      <img class="logo" src="logo.png" alt="Alyona Leonova" onerror="this.style.display='none'">
+      <div class="eyebrow">Тест</div>
+      <h1 class="serif">Какой образ раскрывает вашу <em>истинную природу?</em></h1>
+      <div class="divider"></div>
+      <p>Представьте, что вы создаёте свой идеальный мир, в котором вам комфортно, уютно и красиво, всё нравится и вы чувствуете себя собой.</p>
+      <p>Выбирайте картинки, которые откликаются больше всего. Не думайте, где, как и когда вы будете что-то использовать. Это ваш идеальный мир — в нём можно всё.</p>
+      <p class="howto">В каждом вопросе выберите одну картинку. В конце тест определит ваш ведущий образ.</p>
+      <div class="brandmark" id="brand-intro"></div>
+    </div>
+  </section>
+
+  <!-- ВОПРОСЫ рендерятся сюда -->
+  <div id="questions"></div>
+
+  <!-- РЕЗУЛЬТАТ -->
+  <section class="screen" id="screen-result">
+    <div class="result">
+      <img class="logo" src="logo.png" alt="Alyona Leonova" onerror="this.style.display='none'">
+      <div class="eyebrow">Ваш ведущий архетип</div>
+      <div class="name serif" id="res-name">—</div>
+      <div class="blend" id="res-blend"></div>
+      <div class="divider"></div>
+      <div class="tally" id="res-tally"></div>
+      <div class="cta">
+        <button class="btn" id="res-cta">Забрать разбор образа</button>
+        <div class="mini" id="res-mini"></div>
+      </div>
+      <button class="btn ghost" id="res-back" style="margin-top:16px">Изменить ответы</button>
+      <div class="brandmark" id="brand-result"></div>
+    </div>
+  </section>
+
+</div>
+
+<!-- ПОДВАЛ С КНОПКОЙ -->
+<div class="foot" id="foot" style="display:none">
+  <div class="inner">
+    <button class="btn ghost" id="back" style="display:none">Назад</button>
+    <button class="btn" id="next">Далее</button>
+  </div>
+</div>
+
+<!-- ============================================================
+                       НАСТРОЙКИ
+     ============================================================ -->
+<script id="config">
+const CONFIG = {
+
+  // Порядок архетипов по позиции картинки (1–12).
+  // Позиция 1 в каждом вопросе = первый в списке, и т.д.
+  archetypes: [
+    { name: "Бунтарка",         slug: "buntarka" },        // 1
+    { name: "Амазонка",         slug: "amazonka" },        // 2
+    { name: "Мечтательница",    slug: "mechtatelnitsa" },  // 3
+    { name: "Дикая",            slug: "dikaya" },          // 4
+    { name: "Провидица",        slug: "providitsa" },      // 5
+    { name: "Мудрая",           slug: "mudraya" },         // 6
+    { name: "Заботливая",       slug: "zabotlivaya" },     // 7
+    { name: "Королева",         slug: "koroleva" },        // 8
+    { name: "Земная",           slug: "zemnaya" },         // 9
+    { name: "Вдохновительница", slug: "vdohnovitelnitsa" },// 10
+    { name: "Женщина-Искра",    slug: "zhenshchina-iskra" },// 11
+    { name: "Женщина-Любовь",   slug: "zhenshchina-lyubov" }// 12
+  ],
+
+  // Тексты 11 вопросов
+  questions: [
+    "В каком месте вы чувствуете себя дома?",
+    "Какое искусство вызывает самые сильные эмоции и откликается больше всего?",
+    "Где вы словно начинаете глубже дышать?",
+    "К каким предметам ваша рука потянется сама?",
+    "Какой вайб вам ближе всего?",
+    "Какой фильм вам откликается больше всего?",
+    "В каком пространстве вы бы хотели проводить время?",
+    "Куда вас тянет без всяких объяснений?",
+    "К каким материалам и текстурам вам хочется прикоснуться?",
+    "Какой аксессуар привлечёт ваше внимание и соответствует вашему характеру?",
+    "Представьте, что вы можете оказаться внутри мультфильма — какой герой и мир вокруг него вам интуитивно ближе?"
+  ],
+
+  // Как называются файлы картинок.
+  // {q} — номер вопроса (1–11), {n} — позиция картинки (1–12).
+  // Пример пути: images/q1_1.jpg , images/q1_2.jpg ...
+  imagePath: "images/q{q}_{n}.jpg",
+
+  // Вопросы с горизонтальными картинками (16:9) — показывать целиком, без обрезки.
+  // Указаны кино (6) и мультфильмы (11). Пусто [], если таких нет.
+  containQuestions: [6, 11],
+
+  // Подписи под картинками (например, названия фильмов и мультфильмов).
+  // Ключ — номер вопроса, внутри — 12 подписей по позициям (1–12), по порядку архетипов.
+  // Позиция 1 = Бунтарка, 2 = Амазонка ... 12 = Женщина-Любовь.
+  // Оставьте "" где подпись не нужна.
+  captions: {
+    6:  ["Бойцовский клуб", "Зена, королева воинов", "Амели", "Ешь, молись, люби", "Полночь в Париже", "Код да Винчи", "Маленькие женщины", "Корона", "Форрест Гамп", "Ла-Ла Ленд", "Маска", "Турист"],
+    11: ["Аладдин", "Мулан", "Белоснежка", "Русалочка", "Холодное сердце", "Король Лев (Рафики)", "Лило и Стич", "Король Лев (Симба)", "Микки Маус", "Рататуй", "Аладдин (Джинн)", "Красавица и Чудовище"]
+  },
+
+  // Можно ли выбирать несколько картинок в одном вопросе.
+  // true  — да, каждый выбор даёт +1 своему архетипу.
+  // false — только одна картинка на вопрос.
+  multiSelect: false,
+
+  // Ссылка, куда ведёт кнопка после результата (ваш бот / ManyChat).
+  // {slug} подставит архетип латиницей: например ...?start=koroleva
+  // Оставьте пустым (""), если пока некуда вести.
+  ctaLink: "https://t.me/ВАШ_БОТ?start={slug}",
+
+  // Подпись аккаунта внизу (как на страницах расшифровки).
+  brandHandle: "@alyonaleonova_"
+};
+</script>
+
+<script>
+(function(){
+  const A = CONFIG.archetypes;
+  const Q = CONFIG.questions;
+  const answers = Q.map(()=>new Set()); // выбранные позиции по каждому вопросу
+  let step = -1; // -1 = интро, 0..Q-1 = вопросы, Q = результат
+
+  const foot   = document.getElementById('foot');
+  const nextBtn= document.getElementById('next');
+  const host   = document.getElementById('questions');
+
+  if(CONFIG.brandHandle){
+    const bi=document.getElementById('brand-intro');
+    const br=document.getElementById('brand-result');
+    if(bi) bi.textContent=CONFIG.brandHandle;
+    if(br) br.textContent=CONFIG.brandHandle;
+  }
+
+  // строим экраны вопросов
+  Q.forEach((qtext, qi)=>{
+    const sec = document.createElement('section');
+    sec.className = 'screen';
+    sec.id = 'screen-q'+qi;
+    sec.innerHTML = `
+      <div class="qhead">
+        <div class="counter">Вопрос ${qi+1} из ${Q.length}</div>
+        <div class="bar"><i style="width:${Math.round((qi)/Q.length*100)}%"></i></div>
+        <div class="qtext serif">${qtext}</div>
+        <div class="hint">${CONFIG.multiSelect ? 'Выберите одну или несколько' : 'Выберите одну картинку'}</div>
+      </div>
+      <div class="grid" id="grid-${qi}"></div>`;
+    host.appendChild(sec);
+
+    const grid = sec.querySelector('#grid-'+qi);
+    A.forEach((arch, pi)=>{
+      const pos = pi+1;
+      const qNum = qi+1;
+      const isContain = Array.isArray(CONFIG.containQuestions) && CONFIG.containQuestions.includes(qNum);
+      const cap = (CONFIG.captions && CONFIG.captions[qNum]) ? (CONFIG.captions[qNum][pi]||'') : '';
+      const tile = document.createElement('div');
+      tile.className = 'tile' + (isContain ? ' contain' : '');
+      tile.tabIndex = 0;
+      tile.setAttribute('role','button');
+      tile.setAttribute('aria-label', arch.name);
+      const src = CONFIG.imagePath.replace('{q}', qNum).replace('{n}', pos);
+      tile.innerHTML = `
+        <div class="ph"><span class="num">${pos}</span><span class="nm">${arch.name}</span></div>
+        <img src="${src}" alt="${arch.name}" onload="this.previousElementSibling.style.display='none'" onerror="this.style.display='none'">
+        ${cap ? `<div class="cap">${cap}</div>` : ''}
+        <div class="check">✓</div>`;
+      const toggle = ()=>{
+        const set = answers[qi];
+        if(!CONFIG.multiSelect){
+          grid.querySelectorAll('.tile.sel').forEach(t=>t.classList.remove('sel'));
+          set.clear();
+        }
+        if(set.has(pos)){ set.delete(pos); tile.classList.remove('sel'); }
+        else { set.add(pos); tile.classList.add('sel'); }
+        syncNext();
+      };
+      tile.addEventListener('click', toggle);
+      tile.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();toggle();} });
+      grid.appendChild(tile);
+    });
+  });
+
+  function show(id){
+    document.querySelectorAll('.screen').forEach(s=>s.classList.remove('on'));
+    document.getElementById(id).classList.add('on');
+    window.scrollTo({top:0,behavior:'auto'});
+  }
+
+  const backBtn = document.getElementById('back');
+
+  function syncNext(){
+    if(step<0 || step>=Q.length){ return; }
+    const chosen = answers[step].size>0;
+    nextBtn.disabled = !chosen;
+    nextBtn.textContent = chosen
+      ? (step===Q.length-1 ? 'Показать результат' : 'Далее')
+      : 'Выберите картинку';
+  }
+
+  function render(){
+    if(step < 0){
+      show('screen-intro');
+      foot.style.display='block';
+      backBtn.style.display='none';
+      nextBtn.disabled=false;
+      nextBtn.textContent='Начать';
+      return;
+    }
+    if(step < Q.length){
+      show('screen-q'+step);
+      foot.style.display='block';
+      backBtn.style.display = step>=1 ? 'inline-block' : 'none';
+      syncNext();
+      return;
+    }
+    // результат
+    foot.style.display='none';
+    renderResult();
+    show('screen-result');
+  }
+
+  function go(){ step++; render(); }
+  function back(){ if(step > -1){ step--; render(); } }
+
+  render();
+
+  nextBtn.addEventListener('click', go);
+  backBtn.addEventListener('click', back);
+  document.getElementById('res-back').addEventListener('click', ()=>{ step = Q.length-1; render(); });
+
+  function renderResult(){
+    // подсчёт по архетипам
+    const scores = A.map(()=>0);
+    answers.forEach(set=>{ set.forEach(pos=>{ scores[pos-1]++; }); });
+    const max = Math.max(...scores);
+    const winners = A.map((a,i)=>({a,s:scores[i],i})).filter(x=>x.s===max && max>0);
+
+    const nameEl = document.getElementById('res-name');
+    const blendEl= document.getElementById('res-blend');
+    const cta    = document.getElementById('res-cta');
+    const mini   = document.getElementById('res-mini');
+
+    let primary;
+    if(winners.length<=1){
+      primary = winners[0] ? winners[0].a : A[0];
+      nameEl.textContent = primary.name;
+      blendEl.textContent = '';
+    } else {
+      primary = winners[0].a;
+      nameEl.textContent = winners.map(w=>w.a.name).join(' · ');
+      blendEl.textContent = 'В вас поровну откликнулись несколько образов — это сочетание, и разбор покажет, как они работают вместе.';
+    }
+
+    // шкала
+    const tally = document.getElementById('res-tally');
+    tally.innerHTML='';
+    A.map((a,i)=>({a,s:scores[i]})).sort((x,y)=>y.s-x.s).forEach(row=>{
+      const isTop = row.s===max && max>0;
+      const w = max? Math.round(row.s/max*100):0;
+      const d=document.createElement('div');
+      d.className='row'+(isTop?' top':'');
+      d.innerHTML=`<span class="lb">${row.a.name}</span><span class="tr"><i style="width:${w}%"></i></span><span class="vl">${row.s}</span>`;
+      tally.appendChild(d);
+    });
+
+    // ссылка в бот
+    if(CONFIG.ctaLink){
+      const link = CONFIG.ctaLink.replace('{slug}', primary.slug);
+      cta.onclick=()=>{ window.location.href=link; };
+      mini.textContent='';
+    } else {
+      cta.style.display='none';
+      mini.textContent='Ваш образ: '+primary.name;
+    }
+  }
+})();
+</script>
+</body>
+</html>
