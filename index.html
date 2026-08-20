@@ -84,6 +84,18 @@ body{min-height:100vh;line-height:1.5}
 /* --- результат --- */
 .result{text-align:center;padding-top:30px}
 .result .logo{width:64px;height:auto;margin:0 auto 18px;display:block}
+
+/* --- довыбор при равных баллах --- */
+.tie{text-align:center;padding-top:34px}
+.tie .eyebrow{font-size:12px;letter-spacing:.22em;text-transform:uppercase;color:var(--wine-soft);margin-bottom:14px;line-height:1.5}
+.tie .tie-q{font-size:clamp(26px,7vw,38px);font-weight:500;color:var(--wine);margin-bottom:26px}
+.tie-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;max-width:420px;margin:0 auto}
+@media (min-width:520px){.tie-grid{grid-template-columns:repeat(3,1fr)}}
+.tie-card{cursor:pointer;border:1px solid var(--line);border-radius:12px;overflow:hidden;background:#E7DFD7;transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;-webkit-tap-highlight-color:transparent}
+.tie-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px var(--shadow);border-color:var(--gold)}
+.tie-card img{width:100%;aspect-ratio:3/4;object-fit:cover;display:block}
+.tie-card .nm{padding:11px 6px;font-family:"Cormorant Garamond",serif;font-size:19px;color:var(--wine)}
+.tie-card:focus-visible{outline:3px solid var(--wine);outline-offset:2px}
 .result .eyebrow{font-size:12px;letter-spacing:.28em;text-transform:uppercase;color:var(--wine-soft);margin-bottom:16px}
 .result .name{font-size:clamp(38px,12vw,66px);font-weight:500;color:var(--wine);line-height:1;margin-bottom:6px}
 .result .blend{font-size:15px;color:#6b5c63;margin-top:14px;max-width:440px;margin-left:auto;margin-right:auto}
@@ -121,6 +133,15 @@ body{min-height:100vh;line-height:1.5}
   <!-- ВОПРОСЫ рендерятся сюда -->
   <div id="questions"></div>
 
+  <!-- ДОВЫБОР ПРИ РАВНЫХ БАЛЛАХ -->
+  <section class="screen" id="screen-tie">
+    <div class="tie">
+      <div class="eyebrow" id="tie-eyebrow">Несколько образов отозвались одинаково сильно</div>
+      <div class="tie-q serif">Какой ближе?</div>
+      <div class="tie-grid" id="tie-grid"></div>
+    </div>
+  </section>
+
   <!-- РЕЗУЛЬТАТ -->
   <section class="screen" id="screen-result">
     <div class="result">
@@ -157,19 +178,20 @@ const CONFIG = {
 
   // Порядок архетипов по позиции картинки (1–12).
   // Позиция 1 в каждом вопросе = первый в списке, и т.д.
+  // card — картинка-визитка образа для экрана довыбора при равных баллах.
   archetypes: [
-    { name: "Бунтарка",         slug: "buntarka" },        // 1
-    { name: "Амазонка",         slug: "amazonka" },        // 2
-    { name: "Мечтательница",    slug: "mechtatelnitsa" },  // 3
-    { name: "Дикая",            slug: "dikaya" },          // 4
-    { name: "Провидица",        slug: "providitsa" },      // 5
-    { name: "Мудрая",           slug: "mudraya" },         // 6
-    { name: "Заботливая",       slug: "zabotlivaya" },     // 7
-    { name: "Королева",         slug: "koroleva" },        // 8
-    { name: "Земная",           slug: "zemnaya" },         // 9
-    { name: "Вдохновительница", slug: "vdohnovitelnitsa" },// 10
-    { name: "Женщина-Искра",    slug: "zhenshchina-iskra" },// 11
-    { name: "Женщина-Любовь",   slug: "zhenshchina-lyubov" }// 12
+    { name: "Бунтарка",         slug: "buntarka",         card: "images/q3_1.jpg" },   // 1
+    { name: "Амазонка",         slug: "amazonka",         card: "images/q11_2.jpg" },  // 2
+    { name: "Мечтательница",    slug: "mechtatelnitsa",   card: "images/q4_3.jpg" },   // 3
+    { name: "Дикая",            slug: "dikaya",           card: "images/q1_4.jpg" },   // 4
+    { name: "Провидица",        slug: "providitsa",       card: "images/q8_5.jpg" },   // 5
+    { name: "Мудрая",           slug: "mudraya",          card: "images/q2_6.jpg" },   // 6
+    { name: "Заботливая",       slug: "zabotlivaya",      card: "images/q7_7.jpg" },   // 7
+    { name: "Королева",         slug: "koroleva",         card: "images/q7_8.jpg" },   // 8
+    { name: "Земная",           slug: "zemnaya",          card: "images/q4_9.jpg" },   // 9
+    { name: "Вдохновительница", slug: "vdohnovitelnitsa", card: "images/q1_10.jpg" },  // 10
+    { name: "Женщина-Искра",    slug: "zhenshchina-iskra",card: "images/q6_11.jpg" },  // 11
+    { name: "Женщина-Любовь",   slug: "zhenshchina-lyubov",card: "images/q1_12.jpg" }  // 12
   ],
 
   // Тексты 11 вопросов
@@ -328,14 +350,73 @@ const CONFIG = {
   function go(){ step++; render(); }
   function back(){ if(step > -1){ step--; render(); } }
 
-  render();
+  let tieChoice = null; // образ, выбранный на экране довыбора
+
+  function render(){
+    if(step < 0){
+      show('screen-intro');
+      foot.style.display='block';
+      backBtn.style.display='none';
+      nextBtn.disabled=false;
+      nextBtn.textContent='Начать';
+      return;
+    }
+    if(step < Q.length){
+      show('screen-q'+step);
+      foot.style.display='block';
+      backBtn.style.display = step>=1 ? 'inline-block' : 'none';
+      syncNext();
+      return;
+    }
+    // конец теста: считаем и решаем — довыбор или сразу результат
+    foot.style.display='none';
+    const winners = computeWinners();
+    if(!tieChoice && winners.length > 1){
+      renderTie(winners);
+      show('screen-tie');
+      return;
+    }
+    renderResult();
+    show('screen-result');
+  }
 
   nextBtn.addEventListener('click', go);
   backBtn.addEventListener('click', back);
-  document.getElementById('res-back').addEventListener('click', ()=>{ step = Q.length-1; render(); });
+  document.getElementById('res-back').addEventListener('click', ()=>{ tieChoice=null; step = Q.length-1; render(); });
+
+  render();
+
+  // подсчёт: возвращает лидеров (один или несколько при равенстве)
+  function computeWinners(){
+    const scores = A.map(()=>0);
+    answers.forEach(set=>{ set.forEach(pos=>{ scores[pos-1]++; }); });
+    const max = Math.max(...scores);
+    return A.map((a,i)=>({a,s:scores[i],i})).filter(x=>x.s===max && max>0);
+  }
+
+  // экран довыбора: показывает только образы-претенденты картинками
+  function renderTie(winners){
+    const eyebrow = document.getElementById('tie-eyebrow');
+    eyebrow.textContent = winners.length===2
+      ? 'Два образа отозвались одинаково сильно'
+      : 'Несколько образов отозвались одинаково сильно';
+    const grid = document.getElementById('tie-grid');
+    grid.innerHTML='';
+    winners.forEach(w=>{
+      const c=document.createElement('div');
+      c.className='tie-card';
+      c.tabIndex=0;
+      c.setAttribute('role','button');
+      c.setAttribute('aria-label', w.a.name);
+      c.innerHTML = `<img src="${w.a.card||''}" alt="${w.a.name}" onerror="this.style.display='none'"><div class="nm">${w.a.name}</div>`;
+      const pick=()=>{ tieChoice=w.a; render(); };
+      c.addEventListener('click', pick);
+      c.addEventListener('keydown', e=>{ if(e.key==='Enter'||e.key===' '){e.preventDefault();pick();} });
+      grid.appendChild(c);
+    });
+  }
 
   function renderResult(){
-    // подсчёт по архетипам
     const scores = A.map(()=>0);
     answers.forEach(set=>{ set.forEach(pos=>{ scores[pos-1]++; }); });
     const max = Math.max(...scores);
@@ -346,22 +427,20 @@ const CONFIG = {
     const cta    = document.getElementById('res-cta');
     const mini   = document.getElementById('res-mini');
 
+    // финальный образ: либо единственный лидер, либо выбранный на довыборе
     let primary;
-    if(winners.length<=1){
-      primary = winners[0] ? winners[0].a : A[0];
-      nameEl.textContent = primary.name;
-      blendEl.textContent = '';
-    } else {
-      primary = winners[0].a;
-      nameEl.textContent = winners.map(w=>w.a.name).join(' · ');
-      blendEl.textContent = 'В вас поровну откликнулись несколько образов — это сочетание, и разбор покажет, как они работают вместе.';
-    }
+    if(tieChoice){ primary = tieChoice; }
+    else if(winners.length){ primary = winners[0].a; }
+    else { primary = A[0]; }
+
+    nameEl.textContent = primary.name;
+    blendEl.textContent = '';
 
     // шкала
     const tally = document.getElementById('res-tally');
     tally.innerHTML='';
     A.map((a,i)=>({a,s:scores[i]})).sort((x,y)=>y.s-x.s).forEach(row=>{
-      const isTop = row.s===max && max>0;
+      const isTop = row.a.slug===primary.slug;
       const w = max? Math.round(row.s/max*100):0;
       const d=document.createElement('div');
       d.className='row'+(isTop?' top':'');
@@ -369,9 +448,10 @@ const CONFIG = {
       tally.appendChild(d);
     });
 
-    // ссылка в бот
+    // ссылка в личку
     if(CONFIG.ctaLink){
       const link = CONFIG.ctaLink.replace('{slug}', primary.slug);
+      cta.style.display='';
       cta.onclick=()=>{ window.location.href=link; };
       mini.textContent='';
     } else {
